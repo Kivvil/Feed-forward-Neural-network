@@ -20,14 +20,14 @@ public class Testaus1 {
 	private static final double BIAS_MAX = 1.75, BIAS_MIN = -1.75;
 	private static final double WEIGHT_MAX = 1.75, WEIGHT_MIN = -1.75;
 	
-	private static final int LAYER_MAARA = 2;
+	private static final int LAYER_MAARA = 3;
 	private static final int[] NEURON_MAARAT = {
-			784, 10, 10
+			784, 20, 10, 10
 	};
 	private static final double OPPINOPEUS = 0.1;
 	private static final int BATCH_SIZE = 20;
 	private static final int REPS_ON_BATCH = 100;
-	private static final int BATCH_MAARA = 100000;
+	private static final int BATCH_MAARA = 1000000;
 	
 	private static NeuralNet net;
 	private static MnistMatrix[] mnistMatrix;
