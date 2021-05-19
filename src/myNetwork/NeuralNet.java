@@ -90,7 +90,7 @@ public class NeuralNet {
 			throw new IllegalArgumentException("BatchSize ei voi olla suurempi kuin yksilöiden määrä.");
 		}
 		for(int i = 0; i < batchAmount; i++) {
-			if((i+1) % 200 == 0) {
+			if((i+1) % 100 == 0) {
 				System.out.println("Koulutetaan batch nro. " + (i+1));
 				Testaus1.testaa();
 			}

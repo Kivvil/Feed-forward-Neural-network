@@ -32,6 +32,8 @@ public class Testaus1 {
 	private static NeuralNet net;
 	private static MnistMatrix[] mnistMatrix;
 	private static KoulutusYksilö[] yksilöt;
+	private static KoulutusYksilö[] testiyksilöt;
+	private static MnistMatrix[] testimnistMatrix;
 
 	public static void main(String[] args) {
 		net = new NeuralNet(LAYER_MAARA, NEURON_MAARAT, OPPINOPEUS);
@@ -39,6 +41,8 @@ public class Testaus1 {
 		try {
 			mnistMatrix = new MnistDataReader().readData(
 					"/home/vilho/eclipse-workspace/NeuralNetwork2/testResources/train-images.idx3-ubyte", "/home/vilho/eclipse-workspace/NeuralNetwork2/testResources/train-labels.idx1-ubyte");
+			testimnistMatrix = new MnistDataReader().readData(
+					"/home/vilho/eclipse-workspace/NeuralNetwork2/testResources/t10k-images.idx3-ubyte", "/home/vilho/eclipse-workspace/NeuralNetwork2/testResources/t10k-labels.idx1-ubyte");
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -61,6 +65,22 @@ public class Testaus1 {
 			}
 			yksilöt[i] = new KoulutusYksilö(input, haluttuOutput);
 		}
+		testiyksilöt = new KoulutusYksilö[testimnistMatrix.length];
+		for (int i = 0; i < testimnistMatrix.length; i++) {
+			MnistMatrix matrix = testimnistMatrix[i];
+			RealVector haluttuOutput = new ArrayRealVector(10);
+			haluttuOutput.set(0);
+			haluttuOutput.setEntry(matrix.getLabel(), 1);
+			RealVector input = new ArrayRealVector(784);
+			int totInd = 0;
+			for(int row = 0; row < matrix.getNumberOfRows(); row++) {
+				for(int col = 0; col < matrix.getNumberOfColumns(); col++) {
+					input.setEntry(totInd, matrix.getValue(row, col) / 255d);
+					totInd++;
+				}
+			}
+			testiyksilöt[i] = new KoulutusYksilö(input, haluttuOutput);
+		}
 		try {
 			net.kouluta(yksilöt, BATCH_SIZE, BATCH_MAARA, REPS_ON_BATCH);
 		} catch (IllegalArgumentException | NetworkNotInitializedException e) {
@@ -71,19 +91,19 @@ public class Testaus1 {
 	
 	public static void testaa() {
 		int oikein = 0;
-		for(int i = 0; i < 1000; i++) {
+		for(int i = 0; i < testiyksilöt.length; i++) {
 			RealVector output = null;
 			try {
-				output = net.suorita(yksilöt[i].getInput());
+				output = net.suorita(testiyksilöt[i].getInput());
 			} catch (NetworkNotInitializedException e) {
 				e.printStackTrace();
 			}
-			if(output.getMaxIndex() == yksilöt[i].getHaluttuOutput().getMaxIndex()) {
+			if(output.getMaxIndex() == testiyksilöt[i].getHaluttuOutput().getMaxIndex()) {
 				oikein++;
 			}
 		}
 		System.out.println("Oikein testissä meni " + oikein);
-		float prosentti = ((float)oikein) / 1000f  * 100f;
+		float prosentti = ((float)oikein) / ((float)testiyksilöt.length)  * 100f;
 		System.out.println("Prosentti: " + prosentti);		
 	}
 	

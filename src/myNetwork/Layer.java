@@ -124,8 +124,9 @@ public class Layer {
 	// Palauttaa neuronejen edellisten(a.k.a. seuraavien backpropagationissa) neuronejen vaikutuksen.
 	// Huom: nextNeuron a.k.a. prosessissa(backpropagation) edellinen/previous
 	public RealVector lisääDerivatiivitGradienttiin(RealVector gradient, RealVector neuronDervs) {
-		// Laitetaan weightit
-		
+		// Laitetaan bias+weightit ja lasketaan seuraavan layerin derivatiivit
+		RealVector seuraavaLayerActDervs = new ArrayRealVector(prevNeuronMaara);
+		seuraavaLayerActDervs.set(0.0);
 		for (int row = 0; row < weights.getRowDimension(); row++) {
 			double derAinZ = derivOfSigmoidResult(activations.getEntry(row));
 			for (int col = 0; col < weights.getColumnDimension(); col++) {
@@ -140,19 +141,13 @@ public class Layer {
 			//System.out.println("Biasderv: " + biasDerv);
 			int biasIndex = gradientIndeksi + weightMaara + row;
 			gradient.addToEntry(biasIndex, biasDerv);
-		}
-		
-		RealVector seuraavaLayerActDervs = new ArrayRealVector(prevNeuronMaara);
-		
-		// Lasketaan prosessissa seuraavan layerin neuronejen vaikututs c:hen
-		for(int prevNeuronI = 0; prevNeuronI < prevNeuronMaara; prevNeuronI++) {
-			double prevNeuronDerv = 0.0;
-			for(int thisNeuronI = 0; thisNeuronI < neuronMaara; thisNeuronI++) {
-				double derZinAl_1 = weights.getEntry(thisNeuronI, prevNeuronI);
-				double derAinZ = derivOfSigmoidResult(activations.getEntry(thisNeuronI));
-				prevNeuronDerv += derZinAl_1 * derAinZ * neuronDervs.getEntry(thisNeuronI);
+			
+			// Lasketaan prosessissa seuraavan layerin neuronejen vaikututs c:hen
+			for(int prevNeuronI = 0; prevNeuronI < prevNeuronMaara; prevNeuronI++) {
+				double derZinAl_1 = weights.getEntry(row, prevNeuronI);
+				double prevNeuronDerv = derZinAl_1 * derAinZ * neuronDervs.getEntry(row);
+				seuraavaLayerActDervs.addToEntry(prevNeuronI, prevNeuronDerv);
 			}
-			seuraavaLayerActDervs.setEntry(prevNeuronI, prevNeuronDerv);
 		}
 		
 		return seuraavaLayerActDervs;
