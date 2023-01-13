@@ -130,6 +130,7 @@ public class Layer {
 		for (int row = 0; row < weights.getRowDimension(); row++) {
 			double derAinZ = derivOfSigmoidResult(activations.getEntry(row));
 			for (int col = 0; col < weights.getColumnDimension(); col++) {
+
 				double derZinW = lastLayerActivations.getEntry(col);
 				double derv = derZinW * derAinZ * neuronDervs.getEntry(row);
 				//System.out.println("Weightderv: " + derv);

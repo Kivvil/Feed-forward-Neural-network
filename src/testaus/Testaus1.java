@@ -15,28 +15,29 @@ import myNetwork.Layer;
 import myNetwork.NetworkNotInitializedException;
 import myNetwork.NeuralNet;
 
-public class Testaus1 {
+public class Testaus1 implements NeuralNet.Tester {
 	
 	private static final double BIAS_MAX = 1.75, BIAS_MIN = -1.75;
 	private static final double WEIGHT_MAX = 1.75, WEIGHT_MIN = -1.75;
+	private static final int TEST_BATCH_INTERVAL = 5;
 	
 	private static final int LAYER_MAARA = 3;
 	private static final int[] NEURON_MAARAT = {
-			784, 20, 10, 10
+			784, 30, 50, 10
 	};
 	private static final double OPPINOPEUS = 0.1;
-	private static final int BATCH_SIZE = 20;
+	private static final int BATCH_SIZE = 50;
 	private static final int REPS_ON_BATCH = 100;
-	private static final int BATCH_MAARA = 1000000;
+	private static final int BATCH_MAARA = 500;
 	
-	private static NeuralNet net;
-	private static MnistMatrix[] mnistMatrix;
-	private static KoulutusYksilö[] yksilöt;
-	private static KoulutusYksilö[] testiyksilöt;
-	private static MnistMatrix[] testimnistMatrix;
-
-	public static void main(String[] args) {
-		net = new NeuralNet(LAYER_MAARA, NEURON_MAARAT, OPPINOPEUS);
+	private MnistMatrix[] mnistMatrix;
+	private KoulutusYksilö[] yksilöt;
+	private KoulutusYksilö[] testiyksilöt;
+	private MnistMatrix[] testimnistMatrix;
+	
+	public void aloita() {
+		NeuralNet net = new NeuralNet(LAYER_MAARA, NEURON_MAARAT, OPPINOPEUS);
+		net.addTester(TEST_BATCH_INTERVAL, this);
 		net.randomoi(BIAS_MAX, BIAS_MIN, WEIGHT_MAX, WEIGHT_MIN);
 		try {
 			mnistMatrix = new MnistDataReader().readData(
@@ -86,25 +87,7 @@ public class Testaus1 {
 		} catch (IllegalArgumentException | NetworkNotInitializedException e) {
 			e.printStackTrace();
 		}
-		testaa();
-	}
-	
-	public static void testaa() {
-		int oikein = 0;
-		for(int i = 0; i < testiyksilöt.length; i++) {
-			RealVector output = null;
-			try {
-				output = net.suorita(testiyksilöt[i].getInput());
-			} catch (NetworkNotInitializedException e) {
-				e.printStackTrace();
-			}
-			if(output.getMaxIndex() == testiyksilöt[i].getHaluttuOutput().getMaxIndex()) {
-				oikein++;
-			}
-		}
-		System.out.println("Oikein testissä meni " + oikein);
-		float prosentti = ((float)oikein) / ((float)testiyksilöt.length)  * 100f;
-		System.out.println("Prosentti: " + prosentti);		
+		test(net);
 	}
 	
 	private static void printMnistMatrix(final MnistMatrix matrix) {
@@ -117,4 +100,28 @@ public class Testaus1 {
         }
     }
 
+	@Override
+	public void test(NeuralNet neuralNet) {
+		int oikein = 0;
+		for(int i = 0; i < testiyksilöt.length; i++) {
+			RealVector output = null;
+			try {
+				output = neuralNet.suorita(testiyksilöt[i].getInput());
+			} catch (NetworkNotInitializedException e) {
+				e.printStackTrace();
+			}
+			if(output.getMaxIndex() == testiyksilöt[i].getHaluttuOutput().getMaxIndex()) {
+				oikein++;
+			}
+		}
+		System.out.println("Oikein testissä meni " + oikein);
+		float prosentti = ((float)oikein) / ((float)testiyksilöt.length)  * 100f;
+		System.out.println("Prosentti: " + prosentti);
+		System.out.println("--------------------------------------------------------");
+	}
+
+	public static void main(String[] args) {
+		Testaus1 tester = new Testaus1();
+		tester.aloita();
+	}
 }

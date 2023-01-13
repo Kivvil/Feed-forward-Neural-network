@@ -1,14 +1,29 @@
 package myNetwork;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
+import org.omg.CORBA.PRIVATE_MEMBER;
 
 import testaus.Testaus1;
 
 public class NeuralNet {
+	
+	public interface Tester {
+		void test(NeuralNet neuralNet);
+	}
+	
+	private class IntervalTester {
+		public IntervalTester(int batchInterval, Tester tester) {
+			this.batchInterval = batchInterval;
+			this.tester = tester;
+		}
+		public int batchInterval;
+		public Tester tester;
+	}
 	
 	public static Random random = new Random();
 	
@@ -28,6 +43,8 @@ public class NeuralNet {
 	
 	private double oppiNopeus;
 	
+	private ArrayList<IntervalTester> testers = new ArrayList<NeuralNet.IntervalTester>();
+	
 	public NeuralNet(int layerMaara, int[] neuroniMaarat, double oppiNopeus) {
 		this.layerMaara = layerMaara;
 		this.neuroniMaarat = neuroniMaarat;
@@ -43,6 +60,15 @@ public class NeuralNet {
 		}
 		gradientPituus = layerGradientIndex;
 		this.oppiNopeus = oppiNopeus;
+	}
+	
+	/**
+	 * Lisää testaajan koulutuksen ajaksi.
+	 * @param batchInterval Kuinka monen batchin välein testi suoritetaan kun neuroverkkoa koulutetaan.
+	 * @param tester Testaaja
+	 */
+	public void addTester(int batchInterval, Tester tester) {
+		testers.add(new IntervalTester(batchInterval, tester));
 	}
 
 	public void randomoi(double biasMax, double biasMin, double weightMax, double weightMin) {
@@ -90,9 +116,12 @@ public class NeuralNet {
 			throw new IllegalArgumentException("BatchSize ei voi olla suurempi kuin yksilöiden määrä.");
 		}
 		for(int i = 0; i < batchAmount; i++) {
-			if((i+1) % 100 == 0) {
-				System.out.println("Koulutetaan batch nro. " + (i+1));
-				Testaus1.testaa();
+			
+			for (IntervalTester intervalTester : testers) {
+				if ((i + 1) % intervalTester.batchInterval == 0) {
+					System.out.println("Koulutetaan batch nro. " + (i+1));
+					intervalTester.tester.test(this);
+				}
 			}
 
 			// Generoidaan batch
