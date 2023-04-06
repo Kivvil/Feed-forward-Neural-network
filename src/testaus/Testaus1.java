@@ -41,9 +41,9 @@ public class Testaus1 implements NeuralNet.Tester {
 		net.randomoi(BIAS_MAX, BIAS_MIN, WEIGHT_MAX, WEIGHT_MIN);
 		try {
 			mnistMatrix = new MnistDataReader().readData(
-					"/home/vilho/eclipse-workspace/NeuralNetwork2/testResources/train-images.idx3-ubyte", "/home/vilho/eclipse-workspace/NeuralNetwork2/testResources/train-labels.idx1-ubyte");
+					"testResources/train-images.idx3-ubyte", "testResources/train-labels.idx1-ubyte");
 			testimnistMatrix = new MnistDataReader().readData(
-					"/home/vilho/eclipse-workspace/NeuralNetwork2/testResources/t10k-images.idx3-ubyte", "/home/vilho/eclipse-workspace/NeuralNetwork2/testResources/t10k-labels.idx1-ubyte");
+					"testResources/t10k-images.idx3-ubyte", "testResources/t10k-labels.idx1-ubyte");
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
